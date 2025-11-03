@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(XVISION_VERSION 1.0.0)
-set(GIT_API_URL "https://api.github.com/YOYMYIA/XVision")
+set(XTEST_VERSION 1.0.0)
+set(GIT_API_URL "https://api.github.com/YOYMYIA/XTest")
 #定义项目名称,设置项目版本为变量 指定项目语言为
-project(XVision VERSION ${XVISION_VERSION})
-#定义项目名称为 XVision
-set(PROJECT_NAME_CAPITALIZED "XVision")
+project(XTest VERSION ${XTEST_VERSION})
+#定义项目名称为 XTest
+set(PROJECT_NAME_CAPITALIZED "XTest")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
@@ -21,7 +21,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #设置文件路径
 set(PROJ_ROOT_DIR ${PROJECT_SOURCE_DIR})
 set(PROJ_SRC_DIR ${PROJ_ROOT_DIR}/src)
-set(PROJ_TRD_DIR ${PROJ_ROOT_DIR}/ThirdParty)
+set(PROJ_TRD_DIR ${PROJ_ROOT_DIR}/thirdParty)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

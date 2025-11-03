@@ -1,0 +1,7 @@
+macro(link_with_cmake_library target_name library_path)
+    if(EXISTS ${library_path}/CMakeLists.txt)
+        add_subdirectory(${library_path} ${PROJ_TRD_DIR}/${target_name})
+    else()
+        message(WARNING "CMakeLists.txt not found in ${library_path}")
+    endif()
+endmacro()
