@@ -1,5 +1,5 @@
-libdir=D:/A_Download/Chrome downloads/googletest-main/build/lib
-includedir=D:/A_Download/Chrome downloads/googletest-main/build/include
+libdir=C:/Users/76426/Desktop/googletest-main/install/lib
+includedir=C:/Users/76426/Desktop/googletest-main/install/include
 
 Name: gmock_main
 Description: GoogleMock (with main() function)

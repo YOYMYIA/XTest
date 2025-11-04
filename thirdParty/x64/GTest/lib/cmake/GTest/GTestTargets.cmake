@@ -56,20 +56,18 @@ if(_IMPORT_PREFIX STREQUAL "/")
 endif()
 
 # Create imported target GTest::gtest
-add_library(GTest::gtest SHARED IMPORTED)
+add_library(GTest::gtest STATIC IMPORTED)
 
 set_target_properties(GTest::gtest PROPERTIES
-  INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1"
   INTERFACE_COMPILE_FEATURES "cxx_std_17"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
   INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
 )
 
 # Create imported target GTest::gtest_main
-add_library(GTest::gtest_main SHARED IMPORTED)
+add_library(GTest::gtest_main STATIC IMPORTED)
 
 set_target_properties(GTest::gtest_main PROPERTIES
-  INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1"
   INTERFACE_COMPILE_FEATURES "cxx_std_17"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
   INTERFACE_LINK_LIBRARIES "GTest::gtest"
@@ -77,22 +75,22 @@ set_target_properties(GTest::gtest_main PROPERTIES
 )
 
 # Create imported target GTest::gmock
-add_library(GTest::gmock SHARED IMPORTED)
+add_library(GTest::gmock STATIC IMPORTED)
 
 set_target_properties(GTest::gmock PROPERTIES
-  INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1"
   INTERFACE_COMPILE_FEATURES "cxx_std_17"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
+  INTERFACE_LINK_LIBRARIES "GTest::gtest"
   INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
 )
 
 # Create imported target GTest::gmock_main
-add_library(GTest::gmock_main SHARED IMPORTED)
+add_library(GTest::gmock_main STATIC IMPORTED)
 
 set_target_properties(GTest::gmock_main PROPERTIES
-  INTERFACE_COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1"
   INTERFACE_COMPILE_FEATURES "cxx_std_17"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
+  INTERFACE_LINK_LIBRARIES "GTest::gmock"
   INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
 )
 

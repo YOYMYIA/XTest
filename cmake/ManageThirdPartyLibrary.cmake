@@ -108,12 +108,15 @@ endif()
 #list(APPEND CMAKE_MODULE_PATH "${PROJ_TRD_DIR}/cmake")
 #include(ThirdPartyBuild)
 
-set(GTEST_DIR "${THIRD_PARTY_PREFIX}/googletest")
-list(APPEND CMAKE_MODULE_PATH "${GTEST_DIR}/lib")
+set(GTEST_DIR "${THIRD_PARTY_PREFIX}/GTest")
+list(APPEND CMAKE_PREFIX_PATH ${GTEST_DIR})
+find_package(GTest REQUIRED)
 #file(GLOB GTEST_BINARY "${GTEST_DIR}/bin/*")
 #file(COPY ${GTEST_BINARY} DESTINATION "${EXECUTABLE_OUTPUT_PATH}/")
 
-find_package(GTest REQUIRED)
+#set(GTEST_DIR "${THIRD_PARTY_PREFIX}/GTest")
+#list(APPEND CMAKE_MODULE_PATH ${GTEST_DIR}/lib)
+#find_package(GTest REQUIRED)
 #link_directories(${GTEST_DIR}/lib)
 #include_directories(${GTEST_DIR}/include)
 
