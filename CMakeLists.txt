@@ -118,7 +118,7 @@ set(CMAKE_CXX_FLAGS_DEBUG  "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -Wno-psabi")
 
 #放入全局目录，链接全局库文件（库）
 INCLUDE_DIRECTORIES(
-
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Base
 )
 
 LINK_DIRECTORIES(

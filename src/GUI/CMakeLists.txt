@@ -74,6 +74,9 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJ_BIN_DIR})
 if(WIN32)
     # Windows资源文件
     set(WIN_RESOURCES
+            ../Tests/log/log.cpp
+            ../Tests/log/log.h
+            ../Tests/logTest.h
             #"Res/icon.rc"
     )
 
