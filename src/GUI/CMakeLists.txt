@@ -77,6 +77,10 @@ if(WIN32)
             ../Tests/log/log.cpp
             ../Tests/log/log.h
             ../Tests/logTest.h
+            ../Tests/log/LoggerDefines.h
+            ../Tests/log/LoggerSystem.cpp
+            ../Tests/log/LoggerSystem.h
+            ../Tests/Tools/Singleton.h
             #"Res/icon.rc"
     )
 
