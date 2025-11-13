@@ -2,8 +2,8 @@
 // Created by 76426 on 2025/11/12.
 //
 
-#ifndef XTEST_LOGGERSYSTEM_H
-#define XTEST_LOGGERSYSTEM_H
+#ifndef XTEST_LOGGER_SYSTEM_H
+#define XTEST_LOGGER_SYSTEM_H
 #include <memory>
 #include <unordered_map>
 #include <mutex>
@@ -37,7 +37,7 @@ public:
     bool initialize(const std::string &config_file); // Load configuration from file
 
     //register modules
-    bool registerModule(const std::string& module_name, LogLevel level = LogLevel::INFO, bool enabled = true);
+    bool registerModule(const std::string& module_name, LogLevel level = LogLevel::LOG_INFO, bool enabled = true);
     bool unregisterModule(const std::string& module_name);
     void setModuleLevel(const std::string& module_name, LogLevel level);
     void enableModule(const std::string& module_name, bool enable = true);
@@ -87,11 +87,11 @@ public:
     static LoggerManager& instance();
 
     static bool initSimple(const std::string& log_dir = "logs",
-                           LogLevel level = LogLevel::INFO,
+                           LogLevel level = LogLevel::LOG_INFO,
                            bool console = true, bool file = true);
 
     static bool createModule(const std::string& module_name,
-                             LogLevel level = LogLevel::INFO);
+                             LogLevel level = LogLevel::LOG_INFO);
 
     static void setLevel(LogLevel level);
     static void setModuleLevel(const std::string& module_name, LogLevel level);
@@ -139,4 +139,4 @@ public:
     } while(0)
 
 }
-#endif //XTEST_LOGGERSYSTEM_H
+#endif //XTEST_LOGGER_SYSTEM_H

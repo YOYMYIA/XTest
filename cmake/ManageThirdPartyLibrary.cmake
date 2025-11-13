@@ -4,12 +4,18 @@ if(PROJ_ARCH MATCHES "x64" OR PROJ_ARCH MATCHES "win64")
     message(STATUS "Configuring for Windows x64")
 
     set(SYSTEM_LIBS
+            mingwex  # 放在前面解决符号冲突
             setupapi
             ws2_32
             mswsock
             advapi32
             user32
+            kernel32
     )
+    #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_FLAGS} -lmingwex -lmsvcrt")
+
+    # 允许重复定义解决 _stat64i32 冲突
+    # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-multiple-definition")
 
 else()
     # Linux/Unix 平台

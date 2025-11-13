@@ -2,8 +2,8 @@
 // Created by 76426 on 2025/11/10.
 //
 
-#ifndef XTEST_LOGGERDEFINES_H
-#define XTEST_LOGGERDEFINES_H
+#ifndef XTEST_LOGGER_DEFINES_H
+#define XTEST_LOGGER_DEFINES_H
 
 #include <string>
 
@@ -12,13 +12,13 @@ namespace LoggerSystem
     //Define Log Lever
     enum class LogLevel : int8_t
     {
-        TRACE = 0,
-        DEBUG = 1,
-        INFO = 2,
-        WARN = 3,
-        ERROR = 4,
-        CRITICAL = 5,
-        OFF = 6
+        LOG_TRACE = 0,
+        LOG_DEBUG = 1,
+        LOG_INFO = 2,
+        LOG_WARN = 3,
+        LOG_ERROR = 4,
+        LOG_CRITICAL = 5,
+        LOG_OFF = 6
     };
 
     //Log Output Target
@@ -45,7 +45,7 @@ namespace LoggerSystem
         LogLevel level;
         bool enabled;
 
-        LogModule(const std::string& n, LogLevel l = LogLevel::INFO, bool e = true)
+        LogModule(const std::string& n, LogLevel l = LogLevel::LOG_INFO, bool e = true)
                 : name(n), level(l), enabled(e) {}
     };
 
@@ -54,7 +54,7 @@ namespace LoggerSystem
     {
         // Base Config
         std::string name{"default"};
-        LogLevel level{LogLevel::INFO};
+        LogLevel level{LogLevel::LOG_INFO};
         OutputTarget targets{OutputTarget::CONSOLE};
 
         // Form
@@ -88,4 +88,4 @@ namespace LoggerSystem
 }
 
 
-#endif //XTEST_LOGGERDEFINES_H
+#endif //XTEST_LOGGER_DEFINES_H
