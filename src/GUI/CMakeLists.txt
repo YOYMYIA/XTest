@@ -81,6 +81,11 @@ if(WIN32)
             ../Tests/log/LoggerSystem.cpp
             ../Tests/log/LoggerSystem.h
             ../Tests/Tools/Singleton.h
+            ../XPlat/System/Platform.h
+            ../XPlat/System/Standard.h
+            ../XPlat/System/PlatformDefs.h
+            ../XPlat/File/File.cpp
+            ../XPlat/File/File.h
             #"Res/icon.rc"
     )
 
