@@ -1,3 +1,4 @@
+if(ENABLE_QT)
 project(GUI)
 
 # 设置Qt5自动功能
@@ -139,3 +140,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         # 添加其他包含目录
 )
+
+endif()

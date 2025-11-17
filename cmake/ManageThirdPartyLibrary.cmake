@@ -75,7 +75,7 @@ else()
 endif()
 
 # Qt5 配置
-#if(ENABLE_QT)
+if(ENABLE_QT)
     # 查找Qt5组件
     find_package(Qt5 REQUIRED COMPONENTS
             Core
@@ -108,7 +108,7 @@ endif()
     set(CMAKE_AUTOUIC ON)
 
     message(STATUS "Qt5 support enabled")
-#endif()
+endif()
 
 # 第三方库构建
 #list(APPEND CMAKE_MODULE_PATH "${PROJ_TRD_DIR}/cmake")

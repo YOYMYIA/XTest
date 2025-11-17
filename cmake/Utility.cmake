@@ -17,12 +17,40 @@ macro(add_add_subdirs)
     endforeach ()
 endmacro()
 
+# function(build_shared_library LIB_NAME)
+#     set(${LIB_NAME}_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+#     file(GLOB_RECURSE ${LIB_NAME}_header "${${LIB_NAME}_DIR}/*.h" "${${LIB_NAME}_DIR}/*.hpp")
+#     file(GLOB_RECURSE ${LIB_NAME}_src "${${LIB_NAME}_DIR}/*.c" "${${LIB_NAME}_DIR}/*.cpp")
+
+#     if (NOT ${LIB_NAME}_src)
+#         message(FATAL_ERROR "No source files found for target ${LIB_NAME} in ${${LIB_NAME}_DIR}")
+#     endif()
+
+#     add_library(${LIB_NAME} SHARED ${${LIB_NAME}_src} ${${LIB_NAME}_header})
+#     target_link_libraries(${LIB_NAME} PRIVATE ${SYSTEM_LIBS} ${ARGN})
+# endfunction()
+
 function(build_shared_library LIB_NAME)
     set(${LIB_NAME}_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-    file(GLOB ${LIB_NAME}_header "${${LIB_NAME}_DIR}/*.h" "${${LIB_NAME}_DIR}/*.hpp")
-    file(GLOB ${LIB_NAME}_src "${${LIB_NAME}_DIR}/*.c" "${${LIB_NAME}_DIR}/*.cpp")
-    add_library(${LIB_NAME} SHARED ${${LIB_NAME}_src} ${${LIB_NAME}_header})
-    target_link_libraries(${LIB_NAME} PRIVATE ${SYSTEM_LIBS} ${ARGN})
+    file(GLOB_RECURSE ${LIB_NAME}_header "${${LIB_NAME}_DIR}/*.h" "${${LIB_NAME}_DIR}/*.hpp")
+    file(GLOB_RECURSE ${LIB_NAME}_src "${${LIB_NAME}_DIR}/*.c" "${${LIB_NAME}_DIR}/*.cpp")
+    file(GLOB_RECURSE ${LIB_NAME}_cc "${${LIB_NAME}_DIR}/*.cc")
+    file(GLOB_RECURSE ${LIB_NAME}_cxx "${${LIB_NAME}_DIR}/*.cxx")
+
+    set(all_sources ${${LIB_NAME}_src} ${${LIB_NAME}_cc} ${${LIB_NAME}_cxx})
+
+    if(all_sources)
+        # 有源文件，创建共享库
+        add_library(${LIB_NAME} SHARED ${all_sources} ${${LIB_NAME}_header})
+        target_link_libraries(${LIB_NAME} PRIVATE ${SYSTEM_LIBS} ${ARGN})
+    else()
+        # 只有头文件，创建接口库
+        add_library(${LIB_NAME} INTERFACE)
+        target_include_directories(${LIB_NAME} INTERFACE ${${LIB_NAME}_DIR})
+        if(ARGN)
+            target_link_libraries(${LIB_NAME} INTERFACE ${ARGN})
+        endif()
+    endif()
 endfunction()
 
 function(build_tool TOOL_NAME)
