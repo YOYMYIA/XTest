@@ -55,8 +55,17 @@ public:
     static constexpr bool value = testArgs<Candidate>(nullptr);
 };
 
+/**
+ *  Helper type for the curiously recurring template pattern
+ */
 
+template <class Self>
+struct XBounded {
+  using SelfType = Self;
+  const Self& self() const { return *static_cast<const Self*>(this); }
 
+  Self& self() { return *static_cast<Self*>(this); }
+};
 
 namespace detail{
 
