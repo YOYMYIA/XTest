@@ -5,11 +5,9 @@
 #ifndef XPLAN_STANDARD_H
 #define XPLAN_STANDARD_H
 
-
+#include "Platform.h"
 namespace xplat
 {
-
-#include "Platform.h"
 
 #ifdef XPLAT_LINUX
 // Linux

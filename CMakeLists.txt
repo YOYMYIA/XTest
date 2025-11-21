@@ -12,8 +12,11 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 
 # 设置C/C++标准
 # 启动对C17标准的支持
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c17")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c17")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -77,8 +80,9 @@ endif ()
 
 # 添加cmake模板
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(Utility)
+
 include(ManageThirdPartyLibrary)
+include(Utility)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   add_definitions(-DPALT_DEBUG)

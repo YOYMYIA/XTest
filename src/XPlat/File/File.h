@@ -5,25 +5,28 @@
 #ifndef XPLAN_FILE_H
 #define XPLAN_FILE_H
 
+#include <string>
+#include "System/Standard.h"
+
 namespace xplat
 {
 
-#include "System/Standard.h"
+    typedef std::string String;
+    class XPLAT_API File
+    {
 
-class XPLAT_API File
-{
+    public:
+        File() = default;
+        File(const String &absolutePath);
+        File(const File &);
+        ~File() = default;
+        File &operator=(const String &newAbsolutePath);
 
-public:
-    File() = default;
+    private:
+        //==============================================================================
+        String fullPath_;
+    };
 
-private:
+} // xplat
 
-};
-
-
-}// xplat
-
-
-
-
-#endif //XPLAN_FILE_H
+#endif // XPLAN_FILE_H

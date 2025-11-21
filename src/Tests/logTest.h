@@ -6,7 +6,7 @@
 #define XTEST_LOGTEST_H
 #include <gtest/gtest.h>
 #include "log/log.h"
-#include "File/File.h"
+#include "XPlat/File/File.h"
 
 class LogTest : public ::testing::Test {
 protected:

@@ -5,7 +5,7 @@ if(PROJ_ARCH MATCHES "x64" OR PROJ_ARCH MATCHES "win64")
 
     set(SYSTEM_LIBS
             mingwex  # 放在前面解决符号冲突
-            setupapi
+            setupapic
             ws2_32
             mswsock
             advapi32
@@ -23,6 +23,7 @@ else()
 
     set(SYSTEM_LIBS
             pthread
+            stdc++fs  # C++17文件系统库
             stdc++
             m
             dl
