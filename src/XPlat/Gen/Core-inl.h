@@ -6,7 +6,6 @@ namespace xplat{
 namespace gen{
 
 /**
-
  * @brief Trait to check if a candidate type is compatible with an expected type
  * Matches an expected signature with a candidate signature.
  * @tparam Candidate The candidate type to check
@@ -15,20 +14,18 @@ namespace gen{
  * @return False if the candidate type is not compatible with the expected type
  */
 template <class Candidate, class Expected>
-struct IsCompatibleSignature
+class IsCompatibleSignature
 {
     static constexpr bool value = false;
 };
-
-/**
 
 /**
  * @brief Trait to check if a candidate type is compatible with an expected signature
  * @tparam Candidate The candidate type to check
  * @tparam ExpectedSignature The expected signature to check against
  */
-template <class Candidate, class ExpectedReturn, class ... ArgTypes>
-class IsCompatibleSignature< Candidate, ExpectedReturn(ArgTypes...)>
+ template <class Candidate, class ExpectedReturn, class ... ArgTypes>
+ class IsCompatibleSignature< Candidate, ExpectedReturn(ArgTypes...)>
 {
     /**
      * @tparam F The function type to check

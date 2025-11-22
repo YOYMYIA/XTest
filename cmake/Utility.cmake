@@ -107,6 +107,7 @@ function(build_tests_from_directory LIB_NAME TEST_DIR)
         message(STATUS "Adding test: ${test_exe_name} from ${rel_path}")
         
         add_executable(${test_exe_name} ${test_source})
+        set_target_properties(${test_exe_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/../test/)
         
         # 链接主库和依赖项
         if(TARGET ${LIB_NAME})
