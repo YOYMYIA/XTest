@@ -28,6 +28,7 @@ class Chain;
 } //namespace gen
 } //namespace xplat
 
-#include "Core-inl.h"
 
+#include "Core-inl.h"
 #endif
+

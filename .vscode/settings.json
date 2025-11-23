@@ -72,5 +72,8 @@
         "fstream": "cpp",
         "future": "cpp",
         "span": "cpp"
-    }
+    },
+    "cSpell.words": [
+        "XPLAT"
+    ]
 }
