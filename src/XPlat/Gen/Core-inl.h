@@ -69,6 +69,7 @@ namespace xplat
         struct XBounded
         {
             using SelfType = Self;
+            // This is a function to get the self of this class.
             const Self &self() const { return *static_cast<const Self *>(this); }
 
             Self &self() { return *static_cast<Self *>(this); }
@@ -94,7 +95,14 @@ namespace xplat
 
         namespace detail
         {
-
+            /**
+             * This Class for building up a pipline of operators.
+             * This type is usually used to compose two operators together.
+             * Example:
+             * auto valuesOf = filter([] (Optional<int> & o) {return o.hasValue();})
+             *              | map([] (Optional<int> & o)->int& {return o.value();})
+             * auto valuesIncluded = from(optionals) | valuesOf | as<vector>();
+            */
             template <class First, class Second>
             class Composed : public Operator<Composed<First, Second>>
             {
@@ -105,9 +113,7 @@ namespace xplat
                 Composed() = default;
 
                 Composed(First first, Second second)
-                    : first_(std::move(first)), second_(std::move(second))
-                {
-                }
+                    : first_(std::move(first)), second_(std::move(second)){}
             };
 
         } // namespace detail
@@ -195,6 +201,13 @@ namespace xplat
 
             static constexpr bool infinite = false;
         };
+
+        // template <
+        //     class LeftValue, 
+        //     class Left,
+        //     class RightValue,
+        //     class Right,
+        //     class Chain = detail::Chain<LeftValue, Left, Right>>
 
     } // namespace gen
 } // namespace xplat
