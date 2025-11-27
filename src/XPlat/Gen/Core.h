@@ -14,14 +14,14 @@ class Operator;
 namespace detail 
 {
 
-template <class Self>
-struct XBounded;
+    template <class Self>
+    struct XBounded;
 
-template <class First, class Second>
-class Composed;
+    template <class First, class Second>
+    class Composed;
 
-template <class Value, class First, class Second>
-class Chain;
+    template <class Value, class First, class Second>
+    class Chain;
 
 
 } //namespace detail
