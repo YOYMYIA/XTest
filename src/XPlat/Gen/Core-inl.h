@@ -93,6 +93,52 @@ namespace xplat
             Operator &operator=(const Operator &) = default;
         };
 
+
+        /**
+         * That is a Core of a generator.
+         * implement apply(), foreach() model
+         * apply() is used to apply a function to the result generator.
+         * foreach() is used to iterate over the result generator.
+         * apply() and foreach() are used to modify the result generator.
+         */
+
+
+        template <class Value, class Self>
+        class GenImpl : public XBounded<Self>
+        {
+        protected:
+            GenImpl() = default;
+            GenImpl(GenImpl &&) = default;
+            GenImpl(const GenImpl &) = default;
+            GenImpl &operator=(GenImpl &&) = default;
+            GenImpl &operator=(const GenImpl &) = default;
+
+        public:
+            typedef Value valueType;
+            typedef typename std::decay<Value>::type StorageType;
+
+            /**
+             * Apply the generator to a handler.
+             * Send all values produced by this generator to given handler until the handler returns false.
+             */
+            template <class Handler>
+            bool apply(Handler &&handler) const;
+
+            template <class Body>
+            void foreach (Body &&body) const
+            {
+                this->self().apply(
+                    [&](Value value) -> bool
+                    {
+                        static_assert(!infinite, "infinite generator cannot be used in foreach");
+                        body(std::forward<Value>(value));
+                        return true;
+                    });
+            }
+
+            static constexpr bool infinite = false;
+        };
+
         namespace detail
         {
             /**
@@ -148,8 +194,8 @@ namespace xplat
                 template <class Body>
                 void foreach(Body&& body) const
                 {
-                    first.foreach(std::forward<Body>(body));
-                    second.foreach(std::forward<Body>(body));
+                    first_.foreach(std::forward<Body>(body));
+                    second_.foreach(std::forward<Body>(body));
                 }
 
                 static constexpr bool infinite = First::infinite || Second::infinite;
@@ -196,50 +242,6 @@ namespace xplat
         {
             return Composed(std::move(left.self()), std::move(right.self()));
         }
-
-        /**
-         * That is a Core of a generator.
-         * implement apply(), foreach() model
-         * apply() is used to apply a function to the result generator.
-         * foreach() is used to iterate over the result generator.
-         * apply() and foreach() are used to modify the result generator.
-         */
-
-        template <class Value, class Self>
-        class GenImpl : public XBounded<Self>
-        {
-        protected:
-            GenImpl() = default;
-            GenImpl(GenImpl &&) = default;
-            GenImpl(const GenImpl &) = default;
-            GenImpl &operator=(GenImpl &&) = default;
-            GenImpl &operator=(const GenImpl &) = default;
-
-        public:
-            typedef Value valueType;
-            typedef typename std::decay<Value>::type StorageType;
-
-            /**
-             * Apply the generator to a handler.
-             * Send all values produced by this generator to given handler until the handler returns false.
-             */
-            template <class Handler>
-            bool apply(Handler &&handler) const;
-
-            template <class Body>
-            void foreach (Body &&body) const
-            {
-                this->self().apply(
-                    [&](Value value) -> bool
-                    {
-                        static_assert(!infinite, "infinite generator cannot be used in foreach");
-                        body(std::forward<Value>(value));
-                        return true;
-                    });
-            }
-
-            static constexpr bool infinite = false;
-        };
 
         template <
             class LeftValue,
