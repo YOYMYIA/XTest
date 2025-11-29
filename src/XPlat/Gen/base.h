@@ -1,7 +1,9 @@
 #ifndef XPLAT_GEN_BASE_H
 #define XPLAT_GEN_BASE_H
 
-#include <functional>
+//#include <type_traits>
+#include <utility>
+
 namespace xplat
 {
 
@@ -94,7 +96,44 @@ public:
     const FieldType operator()(const Class* object) const {return object->*field_;}
 };
 
+class Move
+{
+public:
+    template <class Value>
+    auto operator()(Value && value) const
+        -> decltype(std::move(std::forward<Value>(value)))
+    {
+        return std::move(std::forward<Value>(value));
+    }
+};
 
+/**
+    @brief Negate a predicate
+    @tparam Predicate The predicate to negate
+*/
+
+template <class Predicate>
+class Negate
+{
+
+    Predicate predicate_;
+public:
+    Negate() = default;
+    Negate(Predicate predicate) : predicate_(predicate) {}
+    
+    template<class T>
+    bool operator()(T && value) const
+    {
+        return !predicate_(std::forward<T>(value));
+    }
+
+};
+
+template <class Predicate>
+Negate<Predicate> negate(Predicate predicate)
+{
+    return Negate<Predicate>(std::move(predicate));
+}
 
 } //namespace gen
 
