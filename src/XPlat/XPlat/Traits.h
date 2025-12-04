@@ -251,6 +251,67 @@ namespace xplat
         };
 
     } // namespace fallback
+
+    using fallback::is_nothrow_convertible;
+    using fallback::is_nothrow_convertible_v;
+
+    /**
+     * Is Relocatable<T>::value 
+     * Memory a value of type T by using memcpy
+     * ( As opposed to memcpying a pointer to T, approach of calling
+     * the copy constructor and then destorying the old temporary)
+     * 
+     */
+
+    namespace trait_detail
+    {
+        #define XPLAT_HAS_TRYE_XXX(name)                                            \
+        template <typename T>                                                       \
+        using detect_##name = typename T::name;                                     \
+        template <class T>                                                          \
+        struct name##_is_true : std::is_same<typename T::name, std::true_type> {};  \
+        template <class T>                                                          \
+        struct has_true_##name                                                      \
+            : std::conditional<                                                     \
+                is_detected_v<detect_##name, T>,                                    \
+                name##_is_true<T>, std::false_type>::type {}
+
+        XPLAT_HAS_TRYE_XXX(IsRelocatable);
+        XPLAT_HAS_TRYE_XXX(IsZeroRelocatable);
+
+        #undef XPLAT_HAS_TRYE_XXX
+    } // namespace trait_detail
+
+    /**
+     * Ignore
+     * This struct is used to ignore any arguments 
+     * passed to a function
+     */
+    struct Ignore 
+    {
+        Ignore() = default;
+        template <class T>
+        constexpr Ignore(const T&) {}
+        template <class T>
+        const Ignore& operator=(T const&) const
+        {
+            return *this;
+        }
+    };
+
+    template <class...>
+    using Ignored = Ignore;
+
+    namespace traits_detail_IsEquipmentComparable
+    {
+        Ignore operator==(Ignore, Ignore);
+
+        template <class T, class U = T>
+        struct IsEquipmentComparable
+            : std::is_convertible<
+                decltype(std::declval<T>() == std::declval<U>()),
+                bool> {};
+    } 
 }
 
 #endif // XPLAT_TRAITS_H
