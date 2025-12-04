@@ -230,6 +230,27 @@ namespace xplat
 
     template <template <typename...> class T, typename... A>
     struct is_detected : detected_or<nonesuch, T, A...>::value_t {};
+
+    template <typename T>
+    using aligned_storage_for_t =
+    typename std::aligned_storage<sizeof(T), alignof(T)>::type;
+
+    namespace fallback 
+    {
+        template <typename From, typename To>
+        inline constexpr bool is_nothrow_convertible_v = 
+            (std::is_void<From>::value && std::is_void<To>::value) ||
+            (std::is_convertible<From, To>::value && 
+             std::is_nothrow_constructible<From, To>::value);
+
+        template <typename From, typename To>
+        struct is_nothrow_convertible
+            : std::bool_constant<is_nothrow_convertible_v<From, To>>
+        {
+            
+        };
+
+    } // namespace fallback
 }
 
 #endif // XPLAT_TRAITS_H

@@ -75,5 +75,6 @@
     },
     "cSpell.words": [
         "XPLAT"
-    ]
+    ],
+    "makefile.makefilePath": "../"
 }
