@@ -311,7 +311,26 @@ namespace xplat
             : std::is_convertible<
                 decltype(std::declval<T>() == std::declval<U>()),
                 bool> {};
-    } 
+    } // namespace traits_detail_IsEquipmentComparable
+
+    namespace traits_detail_IsLessThanComparable
+    {
+        Ignore operator<(Ignore, Ignore);
+
+        template <class T, class U = T>
+        struct IsLessThanComparable
+            : std::is_convertible<
+                decltype(std::declval<T>() < std::declval<U>()),
+                bool>{};
+        
+    } // namespace traits_detail_IsLessThanComparable
+
+    using traits_detail_IsEquipmentComparable::IsEquipmentComparable;
+    using traits_detail_IsLessThanComparable::IsLessThanComparable;
+    
+
 }
+
+    
 
 #endif // XPLAT_TRAITS_H
