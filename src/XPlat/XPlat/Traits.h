@@ -1,7 +1,7 @@
 #ifndef XPLAT_TRAITS_H
 #define XPLAT_TRAITS_H
 
-#include <tuple>
+//#include <tuple>
 #include <type_traits>
 
 namespace xplat {
@@ -215,6 +215,15 @@ using fallback::is_nothrow_convertible_v;
  * ( As opposed to memcpying a pointer to T, approach of calling
  * the copy constructor and then destorying the old temporary)
  *
+ *
+ * The detect_##name is a SFINAE detector
+ * If T does not have name, this line casues a substitution failure
+ * It uses std::is_same to check if T::name is strictly std::true_type
+ * The is_detected_v that returns true if T is valid and fase otherwise.
+
+ * Logic Flow:
+ * If T::name is exits: It inherits form name##_is_true<T>
+ * If T::name does not exit: It inherits form std::false_type
  */
 
 namespace traits_detail {
@@ -246,6 +255,8 @@ struct Ignore {
 
 template <class...> using Ignored = Ignore;
 
+
+/********************************** Comparable Traits **********************************/
 namespace traits_detail_IsEquipmentComparable {
 Ignore operator==(Ignore, Ignore);
 
@@ -268,6 +279,16 @@ struct IsLessThanComparable
 using traits_detail_IsEquipmentComparable::IsEquipmentComparable;
 using traits_detail_IsLessThanComparable::IsLessThanComparable;
 
+
+/********************************** Relocatable Traits **********************************/
+
+/**
+ * IsRelocatable
+ * This trait is used to check if a type is relocatable
+
+ * The library knows it can move this object in momory using memcpy
+ * rather than calling the copy constructor and the destructor of the object
+ */
 template <class T>
 struct IsRelocatable
     : std::conditional<
@@ -275,6 +296,53 @@ struct IsRelocatable
               is_detected_v<traits_detail::detect_IsRelocatable, T>,
           traits_detail::has_true_IsRelocatable<T>,
           std::is_trivially_copyable<T>>::type {};
+
+/**
+ * IsZeroInitializable
+ * This trait is used to check if a type is zero-initializable
+ 
+ * The library knows it can initialize this object in momory using memset
+ * rather than calling the zero-initialized constructor of the object
+ */
+template <class T>
+struct IsZeroInitializable
+  : std::conditional<
+    !require_sizeof<T> ||
+      is_detected_v<traits_detail::detect_IsZeroRelocatable, T>, 
+      traits_detail::has_true_IsZeroRelocatable<T> , 
+      std::bool_constant<
+      !std::is_class<T>::value &&
+      !std::is_union<T>::value &&
+      !std::is_member_object_pointer<T>::vlaue &&
+      true>>::type{};
+
+/********************** Conditional Trait **********************************/
+
+/**
+ * conditional
+ * This trait is used to select a type based on a condition
+ * Like std::conditional, but with a compile-time condition
+ */
+namespace detail{
+  template <bool>
+  struct conditional_;
+
+  template<>
+  struct conditional_<false>{
+    template <typename, typename T>
+    using apply = T;
+  };
+
+  template<>
+  struct conditional_<true>{
+    template <typename T, typename>
+    using apply = T;
+  };
+}
+
+// conditional_t
+template <bool V, typename T, typename F>
+using conditional_t = typename detail::conditional_<V>::template apply<T, F>;
 
 } // namespace xplat
 
