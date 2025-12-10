@@ -125,6 +125,7 @@ template <typename M, typename O> struct member_pointer_traits<M O::*> {
   using object_type = O;
 };
 
+
 template <typename P>
 using member_pointer_member_t = typename member_pointer_traits<P>::member_type;
 template <typename P>
@@ -132,19 +133,69 @@ using member_pointer_object_t = typename member_pointer_traits<P>::object_type;
 
 namespace detail {
 struct is_constexpr_default_constructible_ {
+
   template <typename T>
   static constexpr auto make(tag_t<T>) -> decltype(void(T()), 0) {
     return (void(T()), 0);
   }
+
+  // SFINTE detector for constexpr default constructible
+  template <typename T, int = make(tag<T>)>
+  static std::true_type sfinae(T*);
+  static std::false_type sfinae(void*);
+  
+  template <typename T>
+  static constexpr bool apply =
+    !require_sizeof<T> || decltype(sfinae(static_cast<T*>(nullptr)))::value;
+};
+}  // namespace detail
+
+/**
+ * A trait variable and type which determines whether the type paramter is
+ * constexpr default constructible
+*/
+template <typename T>
+inline constexpr bool is_constexpr_default_constructible_v =
+    detail::is_constexpr_default_constructible_::apply<T>;
+
+
+template <typename T>
+struct is_constexpr_default_constructible
+    : std::bool_constant<is_constexpr_default_constructible_v<T>> {};
+
+
+/**
+ * _t:
+ * A type used to instead of : using decalyed = typename std::decay<T>::type;
+*/
+template <typename T>
+using _t = typename T::type;
+
+template <typename T>
+struct remove_cvref{
+  using type = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 };
 
-// template <typename T, int = make(tag<T>)>
-// static std::true_type sfinae(T*);
-// static std::false_type sfinae(void*);
-// template <typename T>
-// static constexpr bool apply =
-//     !require_sizeof<T> || decltype(sfinae(static_cast<T*>(nullptr)))::value;
-} // namespace detail
+// remove_cvref_t similar to C++20 std::remove_cvref_t
+template <typename T> using remove_cvref_t = typename remove_cvref<T>::type;
+
+namespace detail {
+
+template <typename Src>
+struct copy_cvref_ {
+  template<typename Dst>
+      using apply = Dst;
+};
+
+template <typename Src>
+struct copy_cvref_<Src const> {
+  template <typename Dst>
+    using apply = Dst const;
+};
+
+}
+
+
 
 /**
  * nonesuch
