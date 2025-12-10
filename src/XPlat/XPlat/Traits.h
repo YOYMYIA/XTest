@@ -344,6 +344,33 @@ namespace detail{
 template <bool V, typename T, typename F>
 using conditional_t = typename detail::conditional_<V>::template apply<T, F>;
 
+template <typename...>
+struct Conjunction: std::true_type{};
+
+template <typename T>
+struct Conjunction<T>: T{};
+
+template <typename T, typename... TList>
+struct Conjunction<T, TList...>
+  :std::conditional<T::value, Conjunction<TList...>, T>::type{};
+
+template <typename...>
+struct Disjunction : std::false_type {};
+template <typename T>
+struct Disjunction<T> : T {};
+template <typename T, typename... TList>
+struct Disjunction<T, TList...>
+    : std::conditional<T::value, T, Disjunction<TList...>>::type {};
+
+template <typename T>
+struct Negation : std::bool_constant<!T::value> {};
+
+template <bool... Bs>
+struct Bools {
+  using valid_type = bool;
+  static constexpr std::size_t size() { return sizeof...(Bs); }
+};
+
 } // namespace xplat
 
 #endif // XPLAT_TRAITS_H

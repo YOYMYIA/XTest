@@ -57,7 +57,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 else ()
   set(PROJ_ARCH "x86")
   add_definitions(-DPLAT_LINUX)
-  set(CMAKE_BUILD_TYPE Debug)
+  #set(CMAKE_BUILD_TYPE Debug)
 endif ()
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)

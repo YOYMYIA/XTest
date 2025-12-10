@@ -76,5 +76,9 @@
     "cSpell.words": [
         "XPLAT"
     ],
-    "makefile.makefilePath": "../"
+    "makefile.makefilePath": "../",
+
+    "cmake.configureArgs": [
+        "-DCMAKE_BUILD_TYPE=Debug"
+    ]
 }
