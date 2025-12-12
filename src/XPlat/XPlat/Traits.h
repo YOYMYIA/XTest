@@ -177,25 +177,115 @@ struct remove_cvref{
 };
 
 // remove_cvref_t similar to C++20 std::remove_cvref_t
-template <typename T> using remove_cvref_t = typename remove_cvref<T>::type;
+template <typename T>
+using remove_cvref_t = typename remove_cvref<T>::type;
 
 namespace detail {
 
 template <typename Src>
 struct copy_cvref_ {
-  template<typename Dst>
-      using apply = Dst;
+  template <typename Dst>
+  using apply = Dst;
 };
 
 template <typename Src>
 struct copy_cvref_<Src const> {
   template <typename Dst>
-    using apply = Dst const;
+  using apply = Dst const;
 };
 
-}
+template <typename Src>
+struct copy_cvref_<Src volatile> {
+  template <typename Dst>
+  using apply = Dst volatile;
+};
+
+template <typename Src>
+struct copy_cvref_<Src const volatile> {
+  template <typename Dst>
+  using apply = Dst const volatile;
+};
+
+template <typename Src>
+struct copy_cvref_<Src&> {
+  template <typename Dst>
+  // This is nested template application syntax in C++.
+  // It means: when Src is a reference type (e.g. T&), apply the cv-qualifiers
+  // recursively and pass Dst as a reference (Dst&) as well.
+  using apply = typename copy_cvref_<Src>::template apply<Dst>&;
+};
+
+template <typename Src>
+struct copy_cvref_<Src&&> {
+  template <typename Dst>
+  using apply = typename copy_cvref_<Src>::template apply<Dst>&&;
+};
 
 
+}  // namespace detail
+
+// To using a toolbox, we need to copy the cv-qualifiers of the source type to the destination type.
+template <typename Src, typename Dst>
+using copy_cvref_t =
+    typename detail::copy_cvref_<Src>::template apply<remove_cvref_t<Dst>>;
+
+namespace detail {
+
+template <typename Src>
+struct copy_ref_ {
+  template <typename Dst>
+  using apply = Dst;
+};
+
+template <typename Src>
+struct copy_ref_<Src &> {
+  template <typename Dst>
+  using apply = Dst&;
+};
+
+template <typename Src>
+struct copy_ref_<Src &&> {
+  template <typename Dst>
+  using apply = Dst&&;
+};
+
+template <typename Src, typename Dst>
+using copy_const_t = std::conditional_t<
+    std::is_const_v<std::remove_reference_t<Src>>,
+    Dst const,
+    Dst>;
+}  // namespace detail
+
+template <typename Src, typename Dst>
+using like_t = typename detail::copy_ref_<Src>::template apply<
+    detail::copy_const_t<Src, std::remove_reference_t<Dst>>>;
+
+template <typename Src, typename Dst>
+struct like {
+  using type = like_t<Src, Dst>;
+};
+
+
+/**
+type_t
+type_t is useful for contorlling chass-template and function-template partial
+specialization.
+
+*/
+namespace traits_detail {
+
+template <class T, class...>
+struct type_t_ {
+  using type = T;
+};
+};  // namespace traits_detail
+
+template <class T, class... Ts>
+using type_t = typename traits_detail::type_t_<T, Ts...>::type;
+
+// void_t is a type-list of void
+template <class... Ts>
+using void_t = type_t<void, Ts...>;
 
 /**
  * nonesuch
@@ -421,6 +511,27 @@ struct Bools {
   using valid_type = bool;
   static constexpr std::size_t size() { return sizeof...(Bs); }
 };
+
+template <class... Ts>
+struct StrictConjunction
+    : std::is_same<Bools<Ts::value...>, Bools<(Ts::value || true)...>> {};
+
+template <class... Ts>
+struct StrictDisjunction
+    : Negation <std::is_same<Bools<Ts::value...>, Bools<(Ts::value && false)...>>> {};
+
+namespace detail {
+template <typename T>
+using is_transparent_ = typename T::is_transparent;
+}
+
+// A tratit variable and type which to test whether a less, equal, or hash type
+template <typename T>
+inline constexpr bool is_transparent_v =
+    is_detected_v<detail::is_transparent_, T>;
+
+template <typename T>
+struct is_transparent : std::bool_constant<is_transparent_v<T>>{};
 
 } // namespace xplat
 
