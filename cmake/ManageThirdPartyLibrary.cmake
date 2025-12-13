@@ -118,6 +118,13 @@ endif()
 set(GTEST_DIR "${THIRD_PARTY_PREFIX}/GTest")
 list(APPEND CMAKE_PREFIX_PATH ${GTEST_DIR})
 find_package(GTest REQUIRED)
+
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+set(PYBIND11_DIR "${THIRD_PARTY_PREFIX}/pybind11")
+list(APPEND CMAKE_PREFIX_PATH ${PYBIND11_DIR})
+find_package(pybind11 REQUIRED)
+
 #file(GLOB GTEST_BINARY "${GTEST_DIR}/bin/*")
 #file(COPY ${GTEST_BINARY} DESTINATION "${EXECUTABLE_OUTPUT_PATH}/")
 
