@@ -5,7 +5,7 @@ if(PROJ_ARCH MATCHES "x64" OR PROJ_ARCH MATCHES "win64")
 
     set(SYSTEM_LIBS
             mingwex  # 放在前面解决符号冲突
-            setupapic
+            #setupapic
             ws2_32
             mswsock
             advapi32
@@ -119,11 +119,15 @@ set(GTEST_DIR "${THIRD_PARTY_PREFIX}/GTest")
 list(APPEND CMAKE_PREFIX_PATH ${GTEST_DIR})
 find_package(GTest REQUIRED)
 
+set(OPENCV_DIR "${THIRD_PARTY_PREFIX}/OpenCV")
+list(APPEND CMAKE_PREFIX_PATH ${OPENCV_DIR})
+find_package(OpenCV REQUIRED)
+
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
-set(PYBIND11_DIR "${THIRD_PARTY_PREFIX}/pybind11")
-list(APPEND CMAKE_PREFIX_PATH ${PYBIND11_DIR})
-find_package(pybind11 REQUIRED)
+#set(PYBIND11_DIR "${THIRD_PARTY_PREFIX}/pybind11")
+#list(APPEND CMAKE_PREFIX_PATH ${PYBIND11_DIR})
+#find_package(pybind11 REQUIRED)
 
 #file(GLOB GTEST_BINARY "${GTEST_DIR}/bin/*")
 #file(COPY ${GTEST_BINARY} DESTINATION "${EXECUTABLE_OUTPUT_PATH}/")

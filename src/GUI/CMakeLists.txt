@@ -87,6 +87,7 @@ if(WIN32)
             ../XPlat/System/PlatformDefs.h
             ../XPlat/File/File.cpp
             ../XPlat/File/File.h
+            ../Tests/CVtest.h
             #"Res/icon.rc"
     )
 
