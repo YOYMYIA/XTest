@@ -531,7 +531,26 @@ inline constexpr bool is_transparent_v =
     is_detected_v<detail::is_transparent_, T>;
 
 template <typename T>
-struct is_transparent : std::bool_constant<is_transparent_v<T>>{};
+struct is_transparent : std::bool_constant<is_transparent_v<T>> {};
+
+namespace detail {
+
+template <typename T, typename = void>
+inline constexpr bool is_allocator_ = !require_sizeof<T>;
+template <typename T>
+    inline constexpr bool is_allocator_ < T,
+    void_t < typename T::value_type,
+    decltype(std::declval<T&>().allocate(std::size_t{})),
+    decltype(std::declval<T&>().deallocate(
+        static_cast<typename T::value_type*>(nullptr), std::size_t{}
+    ))>> = true;
+
+}  // namespace detail
+
+template <typename T>
+inline constexpr bool is_allocator_v = detail::is_allocator_<T>;
+template <typename T>
+struct is_allocator : std::bool_constant<is_allocator_v<T>>{};
 
 } // namespace xplat
 
