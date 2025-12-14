@@ -123,7 +123,7 @@ set(OPENCV_DIR "${THIRD_PARTY_PREFIX}/OpenCV")
 list(APPEND CMAKE_PREFIX_PATH ${OPENCV_DIR})
 find_package(OpenCV REQUIRED)
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+#find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
 
 # 添加cmake模板

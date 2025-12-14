@@ -4,7 +4,7 @@
 #include "XPlat_Gen_Test.h"
 #include "CVtest.h"
 #include <glad/glad.h>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 
 #include <glad/glad.h>
@@ -154,6 +154,17 @@ int main()
     glDeleteBuffers(1, &VBO);
     glDeleteProgram(shaderProgram);
     glfwTerminate();
+
+    try {
+            test_opencv_core();
+            return 0;
+        } catch (const cv::Exception& e) {
+            std::cerr << "OpenCV异常: " << e.what() << std::endl;
+            return -1;
+        } catch (const std::exception& e) {
+            std::cerr << "标准异常: " << e.what() << std::endl;
+            return -1;
+        }
 
     return 0;
 }
