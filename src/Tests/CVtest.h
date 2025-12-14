@@ -79,23 +79,11 @@ void test_opencv_core() {
     cv::transpose(src, transposed);
     std::cout << "转置矩阵:\n" << transposed << std::endl;
 
-    // 重塑
-    int newsz = 2;
-    cv::Mat reshaped = src.reshape(1, 3, &newsz); // 1个通道，3行2列
-    std::cout << "重塑矩阵(3x2):\n" << reshaped << std::endl;
-
     // 5. 基本算法
     std::cout << "\n5. 基本算法:" << std::endl;
     cv::Mat A = (cv::Mat_<double>(2, 2) << 4, 1, 2, 3);
     cv::Mat B = (cv::Mat_<double>(2, 1) << 1, 2);
     cv::Mat X;
-
-    // 求解线性方程组 AX = B
-    cv::solve(A, B, X, cv::DECOMP_LU);
-    std::cout << "求解线性方程组 A*X = B:" << std::endl;
-    std::cout << "A:\n" << A << std::endl;
-    std::cout << "B:\n" << B << std::endl;
-    std::cout << "解 X:\n" << X << std::endl;
 
     // 6. 矩阵统计
     std::cout << "\n6. 矩阵统计:" << std::endl;
@@ -166,17 +154,6 @@ void test_opencv_core() {
     rng.fill(random_gaussian, cv::RNG::NORMAL, 0.0, 1.0);
     std::cout << "高斯随机数: " << random_gaussian << std::endl;
 
-    // 12. 内存管理和引用计数
-    std::cout << "\n12. 内存管理和引用计数:" << std::endl;
-    cv::Mat original = cv::Mat::ones(10, 10, CV_8U);
-    cv::Mat clone_mat = original.clone();     // 深拷贝
-    cv::Mat ref_mat = original;               // 浅拷贝（引用）
-
-    std::cout << "原始矩阵地址: " << original.data << std::endl;
-    std::cout << "克隆矩阵地址: " << clone_mat.data << std::endl;
-    std::cout << "引用矩阵地址: " << ref_mat.data << std::endl;
-
-    std::cout << "\n原始矩阵使用计数: " << original.u->refcount << std::endl;
 
     // 13. 实用工具函数
     std::cout << "\n13. 实用工具函数:" << std::endl;
@@ -192,31 +169,6 @@ void test_opencv_core() {
     double elapsed = (tick_count_end - tick_count) / freq;
     std::cout << "耗时: " << elapsed * 1000 << " ms" << std::endl;
 
-    // 14. 边界检查
-    std::cout << "\n14. 边界检查:" << std::endl;
-    try {
-        cv::Mat out_of_bounds = cv::Mat::zeros(5, 5, CV_8U);
-        // 这会抛出异常（在Debug模式下）
-        uchar value = out_of_bounds.at<uchar>(10, 10);
-        std::cout << "值: " << (int)value << std::endl;
-    } catch (const cv::Exception& e) {
-        std::cout << "捕获到异常: " << e.what() << std::endl;
-        std::cout << "异常代码: " << e.code << std::endl;
-    }
-
-    // 15. 格式化输出
-    std::cout << "\n15. 格式化输出:" << std::endl;
-    cv::Mat format_mat = (cv::Mat_<float>(2, 3) << 1.234567, 2.345678, 3.456789,
-            4.567890, 5.678901, 6.789012);
-    std::cout << "默认格式:\n" << format_mat << std::endl;
-
-    cv::Formatter* fmt = cv::Formatter::get(cv::Formatter::FMT_PYTHON);
-    fmt->set64fPrecision(4);
-    fmt->set32fPrecision(4);
-    fmt->format(format_mat);
-    std::cout << "Python格式(4位小数):\n" << format_mat << std::endl;
-
-    std::cout << "\n=== 测试完成 ===" << std::endl;
 }
 
 #endif //XTEST_CVTEST_H

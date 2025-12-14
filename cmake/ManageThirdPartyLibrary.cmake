@@ -152,3 +152,143 @@ function(check_libraries_exist LIB_LIST)
         endif()
     endforeach()
 endfunction()
+
+
+# ================================================================
+# 函数：copy_directory_files
+# 功能：复制源目录中的文件到目标目录
+# 参数：
+#   SOURCE_DIR - 源目录
+#   DEST_DIR   - 目标目录
+#   PATTERN    - 文件匹配模式（可选，默认为 "*"）
+#   RECURSE    - 是否递归子目录（可选，默认为 FALSE）
+# ================================================================
+function(copy_directory_files SOURCE_DIR DEST_DIR)
+    # 基本参数检查
+    if(NOT SOURCE_DIR)
+        message(FATAL_ERROR "copy_directory_files: 缺少源目录参数")
+    endif()
+
+    if(NOT DEST_DIR)
+        message(FATAL_ERROR "copy_directory_files: 缺少目标目录参数")
+    endif()
+
+    if(NOT EXISTS ${SOURCE_DIR})
+        message(WARNING "copy_directory_files: 源目录不存在: ${SOURCE_DIR}")
+        return()
+    endif()
+
+    # 解析可选参数
+    set(PATTERN "*")
+    set(RECURSE FALSE)
+
+    # 处理额外参数
+    set(EXTRA_ARGS ${ARGN})
+    list(LENGTH EXTRA_ARGS EXTRA_COUNT)
+
+    if(EXTRA_COUNT GREATER 0)
+        list(GET EXTRA_ARGS 0 FIRST_ARG)
+        string(TOUPPER "${FIRST_ARG}" FIRST_ARG_UPPER)
+
+        if(FIRST_ARG_UPPER STREQUAL "RECURSE")
+            set(RECURSE TRUE)
+            if(EXTRA_COUNT GREATER 1)
+                set(PATTERN "${EXTRA_ARGS}")
+                list(REMOVE_AT EXTRA_ARGS 0)
+                string(REPLACE ";" " " PATTERN "${EXTRA_ARGS}")
+            endif()
+        else()
+            set(PATTERN "${FIRST_ARG}")
+            if(EXTRA_COUNT GREATER 1)
+                list(GET EXTRA_ARGS 1 SECOND_ARG)
+                string(TOUPPER "${SECOND_ARG}" SECOND_ARG_UPPER)
+                if(SECOND_ARG_UPPER STREQUAL "RECURSE")
+                    set(RECURSE TRUE)
+                endif()
+            endif()
+        endif()
+    endif()
+
+    # 创建目标目录（如果不存在）
+    if(NOT EXISTS ${DEST_DIR})
+        file(MAKE_DIRECTORY ${DEST_DIR})
+        message(STATUS "创建目录: ${DEST_DIR}")
+    endif()
+
+    # 根据是否递归选择查找方式
+    if(RECURSE)
+        file(GLOB_RECURSE FILES_TO_COPY "${SOURCE_DIR}/${PATTERN}")
+        message(STATUS "递归复制: ${SOURCE_DIR}/${PATTERN} -> ${DEST_DIR}")
+    else()
+        file(GLOB FILES_TO_COPY "${SOURCE_DIR}/${PATTERN}")
+        message(STATUS "复制: ${SOURCE_DIR}/${PATTERN} -> ${DEST_DIR}")
+    endif()
+
+    # 过滤掉目录，只保留文件
+    set(FILES_ONLY "")
+    foreach(FILE_PATH ${FILES_TO_COPY})
+        if(EXISTS ${FILE_PATH} AND NOT IS_DIRECTORY ${FILE_PATH})
+            list(APPEND FILES_ONLY ${FILE_PATH})
+        endif()
+    endforeach()
+
+    # 复制文件
+    set(COPIED_COUNT 0)
+    foreach(FILE_PATH ${FILES_ONLY})
+        get_filename_component(FILE_NAME ${FILE_PATH} NAME)
+
+        # 计算相对路径（用于保持目录结构）
+        if(RECURSE)
+            file(RELATIVE_PATH RELATIVE_PATH ${SOURCE_DIR} ${FILE_PATH})
+            get_filename_component(RELATIVE_DIR ${RELATIVE_PATH} DIRECTORY)
+
+            # 创建子目录
+            if(RELATIVE_DIR)
+                set(TARGET_SUBDIR "${DEST_DIR}/${RELATIVE_DIR}")
+                if(NOT EXISTS ${TARGET_SUBDIR})
+                    file(MAKE_DIRECTORY ${TARGET_SUBDIR})
+                endif()
+                set(TARGET_PATH "${TARGET_SUBDIR}/${FILE_NAME}")
+            else()
+                set(TARGET_PATH "${DEST_DIR}/${FILE_NAME}")
+            endif()
+        else()
+            set(TARGET_PATH "${DEST_DIR}/${FILE_NAME}")
+        endif()
+
+        # 复制文件（仅当不同时复制）
+        add_custom_command(
+                OUTPUT ${TARGET_PATH}
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${FILE_PATH}"
+                "${TARGET_PATH}"
+                DEPENDS ${FILE_PATH}
+                COMMENT "复制: ${FILE_NAME}"
+        )
+
+        # 将输出文件添加到自定义目标
+        list(APPEND ALL_TARGETS ${TARGET_PATH})
+
+        math(EXPR COPIED_COUNT "${COPIED_COUNT} + 1")
+    endforeach()
+
+    # 如果没有文件，直接返回
+    if(COPIED_COUNT EQUAL 0)
+        message(STATUS "没有找到匹配的文件")
+        return()
+    endif()
+
+    # 创建自定义目标（如果需要立即执行）
+    if(NOT "${DEST_DIR}" MATCHES "^\\$<")
+        # 生成目标名称
+        string(MAKE_C_IDENTIFIER "copy_${SOURCE_DIR}_to_${DEST_DIR}" TARGET_NAME)
+
+        add_custom_target(${TARGET_NAME} ALL
+                DEPENDS ${ALL_TARGETS}
+                COMMENT "复制文件从 ${SOURCE_DIR} 到 ${DEST_DIR}"
+        )
+    endif()
+
+    message(STATUS "将复制 ${COPIED_COUNT} 个文件")
+endfunction()
+
