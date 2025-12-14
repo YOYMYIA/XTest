@@ -125,6 +125,11 @@ find_package(OpenCV REQUIRED)
 
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
+
+# 添加cmake模板
+list(APPEND CMAKE_MODULE_PATH "${PROJ_TRD_DIR}/cmake")
+include(Manage3td)
+
 #set(PYBIND11_DIR "${THIRD_PARTY_PREFIX}/pybind11")
 #list(APPEND CMAKE_PREFIX_PATH ${PYBIND11_DIR})
 #find_package(pybind11 REQUIRED)

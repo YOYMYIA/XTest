@@ -5,5 +5,5 @@ include_directories(
         ${OpenCV_LIBS}/
 )
 
-build_ut(Tests LibTest GTest::gtest Base XPlat ${OpenCV_LIBS})
+build_ut(Tests LibTest GTest::gtest Base XPlat ${OpenCV_LIBS} glfw glad)
 copy_directory_files("${OPENCV_DIR}/x64/mingw/bin" ${LIBRARY_OUTPUT_PATH})
