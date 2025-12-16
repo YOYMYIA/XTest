@@ -71,11 +71,3 @@ add_custom_command(
         "${CMAKE_CURRENT_SOURCE_DIR}/../output/"
     COMMENT "Copying ${PY_PKG} to output directory"
 )
-# 复制生成的文件到指定位置
-# add_custom_command(
-#     TARGET ${PY_PKG} POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#     "$<TARGET_FILE:${PY_PKG}>"
-#     "${CMAKE_CURRENT_SOURCE_DIR}/../output/${PY_PKG}$<TARGET_FILE_EXTENSION:${PY_PKG}>"
-#     COMMENT "Copying ${PY_PKG} to output directory"
-# )

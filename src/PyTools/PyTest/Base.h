@@ -7,12 +7,12 @@
 
 #ifdef PLAT_LINUX
 // Linux 平台
-    #ifdef TEST_BUILD_DLL
-        #define TEST_API __attribute__((visibility("default")))
-    #else
-        #define TEST_API
-    #endif
-    #define TEST_CALL
+#ifdef TEST_BUILD_DLL
+#define TEST_API __attribute__((visibility("default")))
+#else
+#define TEST_API
+#endif
+#define TEST_CALL
 #else
 // Windows 平台
 #ifdef DMAI_API_SHARED
@@ -20,18 +20,17 @@
 #else
 #define TEST_API __declspec(dllimport)
 #endif
-#define TEST_CALL __stdcall  // Windows调用约定
+#define TEST_CALL __stdcall // Windows调用约定
 #endif
 
 // 兼容C和C++
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
     TEST_API int add(int a, int b);
 #ifdef __cplusplus
 }
 #endif
 
-
-
-#endif //XVISION_BASE_H
+#endif // XVISION_BASE_H
