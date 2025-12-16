@@ -1,9 +1,28 @@
-# 设置Python版本
-set(PYBIND11_PYTHON_VERSION 3.11)
-# set(Python_VIRTUALENV FIRST) # 如果需要虚拟环境则取消注释
+# 自动检测并使用当前系统的 Python 版本
+# 首先尝试使用 Python3（CMake 3.12+ 推荐方式）
+find_package(Python3 COMPONENTS Interpreter Development QUIET)
+if(Python3_FOUND)
+    set(Python_INCLUDE_DIRS ${Python3_INCLUDE_DIRS})
+    set(Python_LIBRARIES ${Python3_LIBRARIES})
+    set(Python_EXECUTABLE ${Python3_EXECUTABLE})
+    set(PYBIND11_PYTHON_VERSION ${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR})
+    message(STATUS "Found Python ${PYBIND11_PYTHON_VERSION} at ${Python3_EXECUTABLE}")
+else()
+    # 回退到传统的 Python 查找方式（不指定版本，自动检测）
+    find_package(Python COMPONENTS Interpreter Development REQUIRED)
+    # 从 Python 解释器获取版本号
+    execute_process(
+        COMMAND ${Python_EXECUTABLE} -c "import sys; print('{}.{}'.format(sys.version_info.major, sys.version_info.minor))"
+        OUTPUT_VARIABLE PYTHON_VERSION_OUTPUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    set(PYBIND11_PYTHON_VERSION ${PYTHON_VERSION_OUTPUT})
+    message(STATUS "Found Python ${PYBIND11_PYTHON_VERSION} at ${Python_EXECUTABLE}")
+endif()
 
-# 查找Python，指定版本
-find_package(Python ${PYBIND11_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter Development)
+
+# set(Python_VIRTUALENV FIRST) # 如果需要虚拟环境则取消注释
 
 # 设置pybind11路径（如果未安装在标准位置）
 if(NOT DEFINED PUBIND11_DIR)
