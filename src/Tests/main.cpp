@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 
 // #include "logTest.h"
-#include "XPlat_Gen_Test.h"
-#include "CVtest.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -39,9 +37,6 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
 
     // glfw window creation
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
@@ -155,17 +150,6 @@ int main()
     glDeleteProgram(shaderProgram);
     glfwTerminate();
 
-    try {
-            test_opencv_core();
-            return 0;
-        } catch (const cv::Exception& e) {
-            std::cerr << "OpenCV异常: " << e.what() << std::endl;
-            return -1;
-        } catch (const std::exception& e) {
-            std::cerr << "标准异常: " << e.what() << std::endl;
-            return -1;
-        }
-
     return 0;
 }
 
@@ -182,49 +166,3 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-
-//int main(int argc, char *argv[])
-//{
-//    GLFWwindow* window;
-//
-//    /* Initialize the library */
-//    if (!glfwInit())
-//        return -1;
-//
-//    /* Create a windowed mode window and its OpenGL context */
-//    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-//    if (!window)
-//    {
-//        glfwTerminate();
-//        return -1;
-//    }
-//
-//    /* Make the window's context current */
-//    glfwMakeContextCurrent(window);
-//
-//    /* Loop until the user closes the window */
-//    while (!glfwWindowShouldClose(window))
-//    {
-//        /* Swap front and back buffers */
-//        glfwSwapBuffers(window);
-//
-//        /* Poll for and process events */
-//        glfwPollEvents();
-//    }
-//
-//    glfwTerminate();
-//
-//    try {
-//        test_opencv_core();
-//        return 0;
-//    } catch (const cv::Exception& e) {
-//        std::cerr << "OpenCV异常: " << e.what() << std::endl;
-//        return -1;
-//    } catch (const std::exception& e) {
-//        std::cerr << "标准异常: " << e.what() << std::endl;
-//        return -1;
-//    }
-//
-//    testing::InitGoogleTest(&argc, argv);
-//    return RUN_ALL_TESTS();
-//}

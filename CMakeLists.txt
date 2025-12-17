@@ -92,8 +92,12 @@ else()
   set(CMAKE_BUILD_TYPE Release)
 endif ()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+if(NOT WIN32)
+  # Position Independent Code is only needed/valid on ELF platforms (Linux, etc.)
+  # and is not supported by MSVC/clang-cl on Windows, so guard it.
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -Wall -g -ggdb -Wno-psabi")

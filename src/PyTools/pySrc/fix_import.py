@@ -86,3 +86,5 @@ print("  1. The CMakeLists.txt has been updated to auto-detect Python version")
 print("  2. Rebuild the project: cd build/build-x64-Debug && cmake ../.. && ninja/make")
 print("  3. This will create pymodule.cp312-win_amd64.pyd linked to python312.dll")
 
+
+
