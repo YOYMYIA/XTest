@@ -3,7 +3,8 @@
 
 //#include <tuple>
 #include <type_traits>
-
+#include <utility>
+#include <limits>
 namespace xplat {
 
 // C++ 20 std::type_identify && std::type_identity_t
@@ -550,8 +551,118 @@ template <typename T>
 template <typename T>
 inline constexpr bool is_allocator_v = detail::is_allocator_<T>;
 template <typename T>
-struct is_allocator : std::bool_constant<is_allocator_v<T>>{};
+struct is_allocator : std::bool_constant<is_allocator_v<T>> {};
 
 } // namespace xplat
+
+#define XPLAT_ASSUME_RELOCATABLE(...) \
+  struct IsRelocatable<__VA_ARGS__> : std::true_type {};
+
+#define XPLAT_ASSUME_FBVECTOR_COMPATIBLE(...)     \
+  namespace xplat{                                \
+    template <>                                   \
+    XPLAT_ASSUME_FBVECTOR_COMPATIBLE(__VA_ARGS__);\
+  }
+
+#define XPLAT_ASSUME_FBVECTOR_COMPATIBLE_1(...)       \
+  namespace xplat{                                    \
+    template<class T1>                                \
+    XPLAT_ASSUME_FBVECTOR_COMPATIBLE(_VA_ARGS__<T1>); \
+  }
+
+#define XPLAT_ASSUME_FBVECTOR_COMPATIBLE_2(...)           \
+  namespace xplat{                                        \
+    template<class T1, class T2>                          \
+    XPLAT_ASSUME_FBVECTOR_COMPATIBLE(_VA_ARGS__<T1, T2>); \
+  }
+
+#define XPLAT_ASSUME_FBVECTOR_COMPATIBLE_3(...)               \
+  namespace xplat{                                            \
+    template<class T1, class T2, class T3>                    \
+    XPLAT_ASSUME_FBVECTOR_COMPATIBLE(_VA_ARGS__<T1, T2, T3>); \
+  }
+
+#define XPLAT_ASSUME_FBVECTOR_COMPATIBLE_4(...)                   \
+  namespace xplat{                                                \
+  template<class T1, class T2, class T3, class T4>                \
+    XPLAT_ASSUME_FBVECTOR_COMPATIBLE(_VA_ARGS__<T1, T2, T3, T4>); \
+  }
+
+
+namespace xplat {
+  // STL commonly-used types
+template <class T, class U>
+struct IsRelocatable<std::pair<T, U>>
+    : std::bool_constant<IsRelocatable<T>::value && IsRelocatable<U>::value> {};
+
+// Is T one of T1, T2, ..., Tn?
+template <typename T, typename... Ts>
+using IsOneOf = StrictDisjunction<std::is_same<T, Ts>...>;
+
+template <typename T, typename... Ts>
+inline constexpr bool is_one_of_v = IsOneOf<T, Ts...>::value;
+
+// same as x < 0
+template < typename T>
+constexpr bool is_negative(T x){
+  return std::is_signed<T>::value && x <T(0);
+}
+
+// same as x <= 0
+template <typename T>
+constexpr bool is_non_positive(T x){
+  return !x || xplat::is_negative(x);
+}
+
+// same as x > 0
+template <typename T>
+constexpr bool is_positive(T x){
+  return !is_non_positive(x);
+}
+
+// same as x >= 0
+template <typename T>
+constexpr bool is_non_negative(T x){
+  return !x || xplat::is_positive(x);
+}
+
+
+namespace detail {
+
+template <typename RHS, RHS rhs, typename LHS>
+bool less_than_impl(LHS const lhs){
+  // clang-format off
+  return 
+        (!std::is_signed<RHS>::value && is_negative(lhs)) ? true  :
+        (!std::is_signed<LHS>::value && is_negative(rhs)) ? false :
+        rhs > std::numeric_limits<LHS>::max() ? false :
+        rhs < std::numeric_limits<LHS>::lowest() ? true :
+        lhs < rhs;
+
+  // clang-format on
+}
+
+template <typename RHS, RHS rhs, typename LHS>
+bool greater_than_impl(LHS const lhs){
+  // clang-format off
+  return 
+        (!std::is_signed<RHS>::value && is_negative(lhs)) ? false :
+        (!std::is_signed<LHS>::value && is_negative(rhs)) ? true  :
+        rhs > std::numeric_limits<LHS>::max() ? true :
+        rhs < std::numeric_limits<LHS>::lowest() ? false :
+        lhs > rhs;
+
+  // clang-format on
+}
+  
+  
+}// namespace detail
+
+} // namespace xplat
+
+
+
+
+
 
 #endif // XPLAT_TRAITS_H
