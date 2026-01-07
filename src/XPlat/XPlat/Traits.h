@@ -5,14 +5,16 @@
 #include <type_traits>
 #include <utility>
 #include <limits>
+#include <cstdint>
 namespace xplat {
 
 // C++ 20 std::type_identify && std::type_identity_t
-template <typename T> struct type_identify {
+template <typename T> 
+struct type_identity {
   using type = T;
 };
 
-template <typename T> using type_identity_t = typename type_identify<T>::type;
+template <typename T> using type_identity_t = typename type_identity<T>::type;
 
 // define a type-list; A generic value type and value
 template <typename...> struct tag_t {};
@@ -654,15 +656,322 @@ bool greater_than_impl(LHS const lhs){
 
   // clang-format on
 }
-  
+
   
 }// namespace detail
 
+template <typename RHS, RHS rhs, typename LHS>
+bool less_than(LHS const lsh){
+  return detail::less_than_impl<RHS, rhs, typename std::remove_reference_t<LHS>::type>(lsh);
+}
+
+template <typename RHS, RHS rhs, typename LHS>
+bool greater_than(LHS const lsh){
+  return detail::greater_than_impl<RHS, rhs, typename std::remove_reference_t<LHS>::type>(lsh);
+}
+
 } // namespace xplat
 
+namespace xplat
+{
+template <typename Int>
+inline constexpr bool is_non_bool_integral_v = 
+  !std::is_same_v<bool, std::remove_cv_t<Int>> &&std::is_integral_v<Int>;
+
+template <typename Int>
+struct is_non_bool_integral : std::bool_constant<is_non_bool_integral_v<Int>> {};
+
+template <typename T>
+struct is_arithmetic : std:: is_arithmetic<T>{};
+template <typename T>
+inline constexpr bool is_arithmetic_v = is_arithmetic<T>::value;
+
+template <typename T>
+struct is_integral : std:: is_integral<T>{};
+template <typename T>
+inline constexpr bool is_integral_v = is_integral<T>::value;
+
+template <typename T>
+struct is_signed : std:: is_signed<T>{};
+template <typename T>
+inline constexpr bool is_signed_v = is_signed<T>::value;
+
+template <typename T>
+struct is_unsigned : std:: is_unsigned<T>{};
+template <typename T>
+inline constexpr bool is_unsigned_v = is_unsigned<T>::value;
+
+template <typename T>
+struct make_signed : std::make_signed<T> {};
+template <typename T>
+using make_signed_t = typename make_signed<T>::type;
+
+template <typename T>
+struct make_unsigned : std::make_unsigned<T> {};
+template <typename T>
+using make_unsigned_t = typename make_unsigned<T>::type;
 
 
+namespace traits_detail {
 
+template <std::size_t>
+struct uint_bits_t_ {};
+
+template <>
+struct uint_bits_t_<8> : type_t_<std::uint8_t>{};
+template <>
+struct uint_bits_t_<16> : type_t_<std::uint16_t>{};
+template <>
+struct uint_bits_t_<32> : type_t_<std::uint32_t>{};
+template <>
+struct uint_bits_t_<64> : type_t_<std::uint64_t>{};
+
+} // namespace traits_detail
+
+template <std::size_t bits>
+using uint_bits_t = _t<traits_detail::uint_bits_t_<bits>>;
+
+template <std::size_t lg_bits>
+using uint_bits_lg_t = uint_bits_t<(1u << lg_bits)>;
+
+template <std::size_t bits>
+using int_bits_t = make_signed_t<uint_bits_t<bits>>;
+
+template <std::size_t lg_bits>
+using int_bits_lg_t = make_signed_t<uint_bits_lg_t<lg_bits>>;
+
+
+namespace traits_detail
+{
+
+template <std::size_t I, typename T>
+struct type_pack_element_indexed_type {
+  using type = T;
+};
+
+template <typename, typename...>
+struct type_pack_element_set;
+
+template <std::size_t ... I, typename... T>
+struct type_pack_element_set<std::index_sequence<I...>, T...>
+  : type_pack_element_indexed_type<I, T>...{};
+
+template <typename... T>
+using type_pack_element_set_t = type_pack_element_set<std::index_sequence_for<T...>, T...>;
+
+
+template <std::size_t I>
+struct type_pack_element_test{
+  template <typename T>
+  static type_pack_element_indexed_type<I, T> impl(
+    type_pack_element_indexed_type<I, T>*);
+};
+
+template <std::size_t I, typename ... Ts>
+using type_pack_element_fallback = _t<decltype(type_pack_element_test<I>::impl(
+  static_cast<type_pack_element_set_t<Ts...>*>(nullptr)))>;
+
+} // namespace traits_detail
+
+template <std::size_t I, typename... Ts>
+using type_pack_element_t = traits_detail::type_pack_element_fallback<I, Ts...>;
+
+
+// The size of a type pack
+template <typename ... Ts>
+inline constexpr std::size_t type_pack_size_v = sizeof...(Ts);
+
+template <typename ... Ts>
+using type_pack_size_t = index_constant<sizeof...(Ts)>;
+
+namespace traits_detail {
+
+template <std::size_t I, template <typename...> class List, typename... T>
+type_identity<type_pack_element_t<I, T...>> type_list_element_(List<T...> const*);
+
+template <template <typename...> class List, typename... T>
+index_constant<sizeof...(T)> type_list_size_(List<T...> const*);
+
+}// namespace traits_detail
+
+
+// type_list_element_t
+// List<T...>
+template <std::size_t I, typename List>
+using type_list_element_t = _t<decltype(traits_detail::type_list_element_<I>(
+  static_cast<List const*>(nullptr)))>;
+
+// type_list_size_v
+template <typename List>
+inline constexpr std::size_t type_list_size_v = 
+  decltype(traits_detail::type_list_size_(static_cast<List const *>(nullptr)))::value;
+
+namespace detail {
+
+template <typename...>
+struct error_list_concat_params_should_be_non_cvref;
+
+template <template <typename...> class Out, typename... T>
+inline constexpr auto type_list_concat_ = 
+  error_list_concat_params_should_be_non_cvref<T...>{};
+
+template <template <typename...> class Out>
+inline constexpr type_identity<Out<>> type_list_concat_<Out>;
+
+template <
+  template <typename...> class Out,
+  template <typename...> class In,
+  typename... T>
+inline constexpr auto type_list_concat_<Out, In<T...>> = type_identity<Out<T...>>{};
+
+template <
+    template <typename...> class Out,
+    // Allow input lists to come from heterogeneous templates.
+    template <typename...> class InA,
+    typename... A,
+    template <typename...> class InB,
+    typename... B,
+    typename... Tail>
+  inline constexpr auto type_list_concat_<Out, InA<A...>, InB<B...>, Tail...> = 
+    type_list_concat_<Out, tag_t<A..., B...>, Tail...>;
+
+} // namespace detail
+
+/// Each `List` is a type list of the form `InK<TypeK...>`, where the
+/// templates `InK` are potentially heterogeneous.  Concatenates these
+/// `List`s into a single type list `Out<Type1..., Type2..., ...>`.
+template <template <typename...> class Out, typename... List>
+using type_list_concat_t =
+    typename decltype(detail::type_list_concat_<Out, List...>)::type;
+
+
+namespace traits_detail {
+
+template <decltype(auto) V>
+struct value_pack_constant {
+  inline static constexpr decltype(V) value = V;
+};
+  
+} // namespace traits_detail
+
+// A metafunction around sizeof...(V).
+template <auto... V>
+inline constexpr std::size_t value_pack_size_v = sizeof...(V);
+
+// In the value pack V..., the type of the Ith element.
+template <std::size_t I, auto... V>
+using value_pack_element_type_t = type_pack_element_t<I, decltype(V)...>;
+
+// In the value pack V..., the Ith element.
+template <std::size_t I, auto... V>
+inline constexpr value_pack_element_type_t<I, V...> value_pack_element_v =
+    type_pack_element_t<I, traits_detail::value_pack_constant<V>...>::value;
+
+
+namespace traits_detail {
+
+template <typename List>
+struct value_list_traits_;
+
+template <template <auto...> class List, auto... V>
+struct value_list_traits_<List<V...>> {
+  static constexpr std::size_t size = sizeof...(V);
+
+  template <std::size_t I>
+  using element_type = value_pack_element_type_t<I, V...>;
+
+  template <std::size_t I>
+  static constexpr value_pack_element_type_t<I, V...> element = value_pack_element_v<I, V...>;
+};
+
+} // namespace traits_detail
+
+
+template <typename List>
+inline constexpr std::size_t value_list_size_v =
+    traits_detail::value_list_traits_<List>::size;
+
+
+template <typename List>
+using value_list_size_t = index_constant<value_list_size_v<List>>;
+
+
+template <std::size_t I, typename List>
+using value_list_element_type_t =
+    typename traits_detail::value_list_traits_<List>::template element_type<I>;
+
+
+template <std::size_t I, typename List>
+inline constexpr value_list_element_type_t<I, List> value_list_element_v =
+    traits_detail::value_list_traits_<List>::template element<I>;
+
+namespace detail {
+
+// The primary template is only invoked for invalid parameters.
+template <template <auto...> class Out, typename... T>
+inline constexpr auto value_list_concat_ =
+    error_list_concat_params_should_be_non_cvref<T...>{};
+
+template <template <auto...> class Out>
+inline constexpr type_identity<Out<>> value_list_concat_<Out>;
+
+template <template <auto...> class Out, template <auto...> class In, auto... V>
+inline constexpr auto value_list_concat_<Out, In<V...>> =
+    type_identity<Out<V...>>{};
+
+template <
+    template <auto...> class Out,
+    template <auto...> class InA,
+    auto... A,
+    template <auto...> class InB,
+    auto... B,
+    typename... Tail>
+inline constexpr auto value_list_concat_<Out, InA<A...>, InB<B...>, Tail...> =
+    value_list_concat_<Out, vtag_t<A..., B...>, Tail...>;
+
+} // namespace detail
+
+
+template <template <auto...> class Out, typename... List>
+using value_list_concat_t =
+    typename decltype(detail::value_list_concat_<Out, List...>)::type;
+
+namespace detail {
+
+template <typename V, typename... T>
+constexpr bool type_pack_find_a_[sizeof...(T) + 1] = {std::is_same_v<V, T>..., true};
+
+constexpr std::size_t type_pack_find_(bool const* eq) {
+  std::size_t i = 0;
+  while (!eq[i]) {++i;}
+  return i;
+}
+
+template <typename>
+struct type_list_find_;
+template <template <typename...> class List, typename... T>
+struct type_list_find_<List<T...>> {
+  template <typename V>
+  static inline constexpr std::size_t apply = type_pack_find_(type_pack_find_a_<V, T...>);
+};
+
+} // namespace detail
+
+template <typename V, typename... T>
+inline constexpr std::size_t type_pack_find_v =
+    detail::type_pack_find_(detail::type_pack_find_a_<V, T...>);
+
+template <typename V, typename... T>
+using type_pack_find_t = index_constant<type_pack_find_v<V, T...>>;
+
+template <typename V, typename List>
+inline constexpr std::size_t type_list_find_v =
+    detail::type_list_find_<List>::template apply<V>;
+
+template <typename V, typename List>
+using type_list_find_t = index_constant<type_list_find_v<V, List>>;
+
+} // namespace xplat
 
 
 #endif // XPLAT_TRAITS_H
